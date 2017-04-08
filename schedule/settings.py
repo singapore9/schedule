@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import re
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -23,9 +25,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*', ]
 
 
 # Application definition
@@ -71,20 +73,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'schedule.wsgi.application'
 
 
+db_pattern = re.compile(r'\w*://(?P<DB_USER>.*):(?P<DB_PASSWORD>.*)@(?P<DB_HOST>.*):(?P<DB_PORT>.*)/(?P<DB_NAME>.*)')
+
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
-DB_USER = os.environ['DB_USER']
-DB_PASSWORD = os.environ['DB_PASSWORD']
+DATABASE_URL = os.environ['DATABASE_URL']
+db_parts = db_pattern.search(DATABASE_URL)
+DB_NAME = db_parts.group('DB_NAME')
+DB_USER = db_parts.group('DB_USER')
+DB_PASSWORD = db_parts.group('DB_PASSWORD')
+DB_HOST = db_parts.group('DB_HOST')
+DB_PORT = db_parts.group('DB_PORT')
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'schedule',
+        'NAME': DB_NAME,
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'HOST': DB_HOST,
+        'PORT': DB_PORT,
     }
 }
 
@@ -126,6 +135,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 
 REST_FRAMEWORK = {
@@ -135,3 +145,5 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
     ]
 }
+
+STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
