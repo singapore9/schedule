@@ -17,11 +17,16 @@ from django.conf.urls import url, include
 from django.contrib import admin
 
 from scheduleapp.urls import test_api_patterns
+from custom_auth.urls import auth_api_patterns
+
+from custom_auth.urls import urls as custom_auth_urls
 
 api_patterns = [] + \
-    test_api_patterns
+    test_api_patterns + \
+    auth_api_patterns
 
 urlpatterns = [
+    url(r'^auth/', include(custom_auth_urls)),
     url(r'^admin/', admin.site.urls),
     url(r'^api/', include(api_patterns)),
 ]
