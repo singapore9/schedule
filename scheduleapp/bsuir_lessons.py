@@ -155,22 +155,20 @@ def get_schedule_for(local_group_id):
     cur_week = get_cur_week()
 
     week_start = get_week_start()
-    repeat_count = 3
     for lesson in group_schedule:
         for week in lesson['weeks']:
-            for i in range(repeat_count):
-                week = int(week) + 4 * i
-                if week > cur_week:
-                    lesson_dt = (week_start + timedelta(days=(7 * (week-cur_week)+lesson['week_day']))).date()
-                    lesson_date, _ = LessonDate.objects.get_or_create(date=lesson_dt, group_id=group.id)
-                    Lesson.objects.get_or_create(group_id=group.id,
-                                                 name_id=ln_indices[lesson['name']],
-                                                 time_id=lt_indices[(lesson['start_time'], lesson['end_time'])],
-                                                 teacher_id=teacher_indices[lesson['teacher']] if lesson['teacher'] else None,
-                                                 location=lesson['location'],
-                                                 type=lesson['type'],
-                                                 note=lesson['note'],
-                                                 date_id=lesson_date.id)
+            week = int(week)
+            week = week if week > cur_week else (week + 4)
+            lesson_dt = (week_start + timedelta(days=(7 * (week-cur_week)+lesson['week_day']))).date()
+            lesson_date, _ = LessonDate.objects.get_or_create(date=lesson_dt, group_id=group.id)
+            Lesson.objects.get_or_create(group_id=group.id,
+                                         name_id=ln_indices[lesson['name']],
+                                         time_id=lt_indices[(lesson['start_time'], lesson['end_time'])],
+                                         teacher_id=teacher_indices[lesson['teacher']] if lesson['teacher'] else None,
+                                         location=lesson['location'],
+                                         type=lesson['type'],
+                                         note=lesson['note'],
+                                         date_id=lesson_date.id)
 
 
 def update_faculty(faculty_id):
