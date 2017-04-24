@@ -25,7 +25,7 @@ class TeacherAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ('period', 'date', 'name', 'type', 'teacher', 'note', )
+    list_display = ('time', 'date', 'name', 'type', 'teacher', 'note', )
 
 
 @admin.register(Group)

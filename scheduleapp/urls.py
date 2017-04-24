@@ -2,12 +2,12 @@ from django.conf.urls import url, include
 from rest_framework import routers
 
 from .api import UserViewSet
-from .api import LessonsViewSet
+from .api import ScheduleViewSet
 
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet)
-router.register(r'lessons', LessonsViewSet)
+router.register(r'schedule', ScheduleViewSet)
 
 test_api_patterns = [
     url(r'', include(router.urls))

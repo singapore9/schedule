@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Lesson, LessonName, LessonTime, Group, Teacher
+from .models import Lesson, LessonTime, LessonDate
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -10,36 +10,39 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
         fields = ('url', 'username', 'email', )
 
 
-class LessonNameSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LessonName
-        fields = ('name', )
-
-
 class LessonTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = LessonTime
         fields = ('beginning_at', 'ended_at',)
 
 
-class GroupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Group
-        fields = ('name', )
-
-
-class TeacherSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Teacher
-        fields = ('full_name', )
-
-
 class LessonSerializer(serializers.ModelSerializer):
-    group = GroupSerializer()
-    name = LessonNameSerializer()
-    period = LessonTimeSerializer()
-    teacher = TeacherSerializer()
+    group = serializers.SerializerMethodField()
+    name = serializers.SerializerMethodField()
+    time = LessonTimeSerializer()
+    teacher = serializers.SerializerMethodField()
 
     class Meta:
         model = Lesson
-        fields = ('group', 'name', 'type', 'note', 'date', 'period', 'teacher', )
+        fields = ('group', 'name', 'type', 'note', 'time', 'teacher', 'id', )
+        read_only_fields = ('id', )
+
+    def get_group(self, instance):
+        return instance.group.name
+
+    def get_name(self, instance):
+        return instance.name.name
+
+    def get_teacher(self, instance):
+        return instance.teacher.full_name if instance.teacher else None
+
+    def get_date(self, instance):
+        return instance.date.date
+
+
+class DaySerializer(serializers.ModelSerializer):
+    lessons = LessonSerializer(many=True)
+
+    class Meta:
+        model = LessonDate
+        fields = ('date', 'lessons')
