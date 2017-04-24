@@ -6,6 +6,20 @@ import requests
 from .models import Teacher, University, Faculty, Group, Lesson, LessonName, LessonTime, LessonDate
 
 
+# Correct names for faculties from BSUIR by local_id
+faculty_name = {'20040': 'ФТК',
+                '20017': 'ФКП',
+                '20012': 'ИЭФ',
+                '20005': 'ФИТиУ',
+                '20035': 'ФРЭ',
+                '20054': 'Магистратура',
+                '20004': 'ФЗО',
+                '20026': 'ФКСиС',
+                '20033': 'ФКТ (ИИТ)',
+                '20000': 'ВФ', }
+
+
+
 def select_type(type_name):
     if type_name == 'ПЗ':
         return 2
@@ -79,7 +93,8 @@ def get_all_groups():
     glob_id_from_local = dict()
     for local_id in set(map(lambda g: g['faculty_local_id'], groups)):
         faculty, _ = Faculty.objects.get_or_create(university=university,
-                                                   local_id=local_id)
+                                                   local_id=local_id,
+                                                   name=faculty_name[local_id])
         glob_id_from_local.update({local_id: faculty.id})
 
     for group in groups:
