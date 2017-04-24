@@ -1,7 +1,32 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Lesson, LessonTime, LessonDate
+from .models import Lesson, LessonTime, LessonDate, University, Faculty, Group
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Group
+        fields = ('name', 'id')
+
+
+class FacultySerializer(serializers.ModelSerializer):
+    groups = GroupSerializer(many=True)
+
+    class Meta:
+        model = Faculty
+        fields = ('groups', 'name', 'id')
+
+
+class UniversitySerializer(serializers.ModelSerializer):
+    faculties = FacultySerializer(many=True)
+
+    class Meta:
+        model = University
+        fields = ('faculties', 'name', 'id')
+
+
+
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
