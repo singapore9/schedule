@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import University, LessonTime, LessonName, Lesson, Faculty, Group, Teacher
+from .models import University, LessonTime, LessonName, Lesson, Faculty, Group, Teacher, LessonDate
 
 
 @admin.register(University)
@@ -25,7 +25,12 @@ class TeacherAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
-    list_display = ('time', 'date', 'name', 'type', 'teacher', 'note', )
+    list_display = ('time', 'date', 'name', 'type', 'teacher', 'note', 'location', )
+
+
+@admin.register(LessonDate)
+class LessonDateAdmin(admin.ModelAdmin):
+    list_display = ('date', 'group')
 
 
 @admin.register(Group)

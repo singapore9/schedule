@@ -132,7 +132,7 @@ def get_schedule_for(local_group_id):
             teacher = lesson.find('employee')
             if teacher:
                 teachers.add(teacher.find('id').text)
-            location = lesson.find('auditory').text if lesson.find('auditory') else None
+            location = lesson.find('auditory').text if lesson.find('auditory') is not None else None
             weeks = set(list((map(lambda elem: elem.text, lesson.findall('weekNumber'))))) - {'0', }
             lesson_info = {'start_time': start_time,
                            'end_time': end_time,

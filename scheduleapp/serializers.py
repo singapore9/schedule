@@ -26,9 +26,6 @@ class UniversitySerializer(serializers.ModelSerializer):
         fields = ('faculties', 'name', 'id')
 
 
-
-
-
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
@@ -49,7 +46,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = ('group', 'name', 'type', 'note', 'time', 'teacher', 'id', )
+        fields = ('group', 'name', 'type', 'note', 'time', 'teacher', 'id', 'location', )
         read_only_fields = ('id', )
 
     def get_group(self, instance):
