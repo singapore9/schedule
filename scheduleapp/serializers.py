@@ -33,6 +33,9 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class LessonTimeSerializer(serializers.ModelSerializer):
+    beginning_at = serializers.DateTimeField(format="%H:%M")
+    ended_at = serializers.DateTimeField(format="%H:%M")
+
     class Meta:
         model = LessonTime
         fields = ('beginning_at', 'ended_at',)
