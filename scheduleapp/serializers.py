@@ -1,6 +1,6 @@
-from django.contrib.auth.models import User
 from rest_framework import serializers
 
+from custom_auth.serializers import BaseApplicationUserSerializer
 from .models import Lesson, LessonTime, LessonDate, University, Faculty, Group
 
 
@@ -26,12 +26,6 @@ class UniversitySerializer(serializers.ModelSerializer):
         fields = ('faculties', 'name', 'id')
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ('url', 'username', 'email', )
-
-
 class LessonTimeSerializer(serializers.ModelSerializer):
     beginning_at = serializers.DateTimeField(format="%H:%M")
     ended_at = serializers.DateTimeField(format="%H:%M")
@@ -46,10 +40,12 @@ class LessonSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     time = LessonTimeSerializer()
     teacher = serializers.SerializerMethodField()
+    slackers = BaseApplicationUserSerializer(many=True)
+    visitors = BaseApplicationUserSerializer(many=True)
 
     class Meta:
         model = Lesson
-        fields = ('group', 'name', 'type', 'note', 'time', 'teacher', 'id', 'location', )
+        fields = ('group', 'name', 'type', 'note', 'time', 'teacher', 'id', 'location', 'slackers', 'visitors')
         read_only_fields = ('id', )
 
     def get_group(self, instance):

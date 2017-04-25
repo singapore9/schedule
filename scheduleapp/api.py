@@ -1,15 +1,10 @@
 import datetime
-from django.contrib.auth.models import User
 from rest_framework import mixins
 from rest_framework import viewsets
 
-from .models import Lesson, LessonDate, Group, University
-from .serializers import UserSerializer, LessonSerializer, DaySerializer, UniversitySerializer
+from .models import LessonDate, Group, University
+from .serializers import DaySerializer, UniversitySerializer
 from .bsuir_lessons import get_schedule_for
-
-class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
 
 
 class ScheduleViewSet(viewsets.ReadOnlyModelViewSet):

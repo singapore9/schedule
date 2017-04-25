@@ -1,13 +1,8 @@
 from django.contrib import admin
 
-from .models import Token, ApplicationUser
-
-
-@admin.register(Token)
-class VkTokenAdmin(admin.ModelAdmin):
-    list_display = ('token', 'user', 'created_at', 'expires_in', )
+from .models import ApplicationUser
 
 
 @admin.register(ApplicationUser)
 class ApplicationUserAdmin(admin.ModelAdmin):
-    list_display = ('email', )
+    list_display = ('email', 'first_name', 'last_name', 'id')

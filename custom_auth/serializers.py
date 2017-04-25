@@ -1,9 +1,17 @@
 from rest_framework import serializers
 
-from custom_auth.models import Token
+from custom_auth.models import ApplicationUser
 
 
-class VkTokenSerializer(serializers.ModelSerializer):
+class BaseApplicationUserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Token
-        fields = ('auth_type', 'token', 'expires_in', )
+        model = ApplicationUser
+        fields = ('email', 'first_name', 'last_name', 'id')
+        read_only_fields = ('id', )
+
+
+class ApplicationUserSerializer(BaseApplicationUserSerializer):
+    class Meta(BaseApplicationUserSerializer.Meta):
+        fields = BaseApplicationUserSerializer.Meta.fields + ('visited_lessons', 'unvisited_lessons')
+        read_only_fields = BaseApplicationUserSerializer.Meta.read_only_fields + ('visited_lessons', 'unvisited_lessons')
+
