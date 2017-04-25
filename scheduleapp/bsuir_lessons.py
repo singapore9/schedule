@@ -53,7 +53,7 @@ def get_cur_week():
 
 def get_week_start():
     weekday = datetime.today().isocalendar()[2]
-    return datetime.today() - timedelta(days=weekday)
+    return datetime.today() - timedelta(days=weekday-1)
 
 
 def get_all_teachers():
