@@ -126,9 +126,8 @@ def get_schedule_for(local_group_id):
             lesson_type = select_type(lesson.find('lessonType').text)
             subject = lesson.find('subject').text
             sub_group = lesson.find('numSubgroup')
-            sub_group = ('Подгр: %s; ' % sub_group.text) if int(sub_group.text) else ''
-            note = lesson.find('note')
-            notes = sub_group + (note.text if note.text else '')
+            sub_group = str(sub_group.text) if int(sub_group.text) else ''
+            notes = sub_group
             names.add(subject)
             teacher = lesson.find('employee')
             if teacher:
