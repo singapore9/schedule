@@ -1,3 +1,4 @@
+from rest_framework import status
 from rest_framework import viewsets
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
@@ -13,6 +14,18 @@ class ApplicationUserViewSet(viewsets.ModelViewSet):
 
     queryset = ApplicationUser.objects.all()
     serializer_class = ApplicationUserSerializer
+
+    def create(self, request, *args, **kwargs):
+        instance = ApplicationUser.objects.get(email__iexact=request.data['email'])
+        if instance:
+            serializer = self.get_serializer(instance=instance)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK, headers=headers)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        headers = self.get_success_headers(serializer.data)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @detail_route(methods=['POST', ])
     def visit(self, request, **kwargs):
