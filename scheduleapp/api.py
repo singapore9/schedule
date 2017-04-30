@@ -18,7 +18,10 @@ class ScheduleViewSet(viewsets.ReadOnlyModelViewSet):
         date_to = datetime.datetime.strptime(date_to, '%Y-%m-%d').date()
         group_id = int(self.request.query_params.get('group_id'))
         if LessonDate.objects.filter(group_id=group_id).count() == 0:
-            get_schedule_for(Group.objects.get(id=group_id).local_id)
+            try:
+                get_schedule_for(Group.objects.get(id=group_id).local_id)
+            except Exception as e:
+                pass
         items = LessonDate.objects.filter(date__gte=date_from, date__lt=date_to, group_id=group_id).order_by('date')
         return items
 
