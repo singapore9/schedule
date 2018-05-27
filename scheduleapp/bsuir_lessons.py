@@ -7,7 +7,7 @@ from .models import Teacher, University, Faculty, Group, Lesson, LessonName, Les
 
 
 # Correct names for faculties from BSUIR by local_id
-faculty_name = {'20040': 'ФТК',
+faculty_name = {'20040': 'ФИК',
                 '20017': 'ФКП',
                 '20012': 'ИЭФ',
                 '20005': 'ФИТиУ',
@@ -17,7 +17,6 @@ faculty_name = {'20040': 'ФТК',
                 '20026': 'ФКСиС',
                 '20033': 'ФКТ (ИИТ)',
                 '20000': 'ВФ', }
-
 
 
 def select_type(type_name):
@@ -46,7 +45,7 @@ def select_day(day_name):
 
 
 def get_cur_week():
-    url = 'https://www.bsuir.by/schedule/rest/currentWeek/date/%s' % datetime.today().strftime("%d.%m.%Y")
+    url = 'http://students.bsuir.by/api/v1/week'
     resp = requests.get(url)
     return int(resp.text)
 
@@ -57,13 +56,12 @@ def get_week_start():
 
 
 def get_all_teachers():
-    url = 'https://www.bsuir.by/schedule/rest/employee'
+    url = 'https://students.bsuir.by/api/v1/employees'
     university, _ = University.objects.get_or_create(name='БГУИР')
     resp = requests.get(url)
-    root = ET.fromstring(resp.text)
-    teacher_objects = root.findall('employee')
+    teacher_objects = resp.json()
     for item in teacher_objects:
-        fullname = '%s %s %s' % (item.find('lastName').text, item.find('firstName').text, item.find('middleName').text)
+        fullname = '%s %s %s' % (item['lastName'], item['firstName'], item['middleName'])
         bsuir_key = item.find('id').text
         Teacher.objects.get_or_create(university=university,
                                       full_name=fullname,
@@ -72,23 +70,15 @@ def get_all_teachers():
 
 def get_all_groups():
     groups = []
-    url = 'http://www.bsuir.by/schedule/rest/studentGroup'
+    url = 'https://students.bsuir.by/api/v1/groups'
     resp = requests.get(url)
-    data = resp.text
-    root = ET.fromstring(data)
-    for group_xml in root:
-        if group_xml.tag != 'studentGroup':
-            continue
-        group_info = {}
-        for child_xml in group_xml:
-            tag = child_xml.tag
-            if tag == 'id':
-                group_info.update({'local_id': child_xml.text})
-            elif tag == 'name':
-                group_info.update({'name': child_xml.text})
-            elif tag == 'facultyId':
-                group_info.update({'faculty_local_id': child_xml.text})
-        groups.append(group_info)
+    data = resp.json()
+    for group in data:
+        group_info = {
+            'local_id': group['id'],
+            'name': group['name'],
+            'faculty_local_id': group['facultyId']
+        }
     university, _ = University.objects.get_or_create(name='БГУИР')
     glob_id_from_local = dict()
     for local_id in set(map(lambda g: g['faculty_local_id'], groups)):
@@ -107,33 +97,32 @@ def get_schedule_for(local_group_id):
     group_schedule = []
     university, _ = University.objects.get_or_create(name='БГУИР')
 
-    resp = requests.get('https://www.bsuir.by/schedule/rest/schedule/%s' % local_group_id)
-    data = resp.text
-    root = ET.fromstring(data)
+    resp = requests.get('https://students.bsuir.by/api/v1/studentGroup/schedule?id=%s' % local_group_id)
+    data = resp.json()
 
     times = set()
     names = set()
     teachers = set()
 
-    for day_schedule in root:
-        lessons = day_schedule[:-1]
-        day = select_day(day_schedule[-1].text)
+    for day_schedule in data['schedules']:
+        lessons = day_schedule['schedule']
+        day = day_schedule['weekDay']
         for lesson in lessons:
-            lesson_time = lesson.find('lessonTime').text
+            lesson_time = lesson['lessonTime']
             start_time, end_time = map(lambda t: datetime.strptime(t, '%H:%M').time(), lesson_time.split('-'))
             times.add((start_time, end_time))
 
-            lesson_type = select_type(lesson.find('lessonType').text)
-            subject = lesson.find('subject').text
-            sub_group = lesson.find('numSubgroup')
-            sub_group = str(sub_group.text) if int(sub_group.text) else ''
-            notes = sub_group
+            lesson_type = select_type(lesson['lessonType'])
+            subject = lesson['subject']
+            sub_group = lesson['numSubgroup'] or ''
+            main_notes = lesson['note']
+            notes = '%s, %s' % (sub_group, main_notes) if (sub_group and main_notes) else '%s' % (sub_group or main_notes)
             names.add(subject)
-            teacher = lesson.find('employee')
+            teacher = lesson['employee']
             if teacher:
-                teachers.add(teacher.find('id').text)
-            location = lesson.find('auditory').text if lesson.find('auditory') is not None else None
-            weeks = set(list((map(lambda elem: elem.text, lesson.findall('weekNumber'))))) - {'0', }
+                teachers.add(teacher[0]['id'])
+            location = lesson['auditory'][0] if lesson['auditory'] else None
+            weeks = set(lesson['weekNumber']) - {0, }
             lesson_info = {'start_time': start_time,
                            'end_time': end_time,
                            'teacher': teacher.find('id').text if teacher else None,
