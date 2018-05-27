@@ -124,10 +124,10 @@ def get_schedule_for(local_group_id):
             if teacher:
                 teachers.add(str(teacher[0]['id']))
             location = lesson['auditory'][0] if lesson['auditory'] else None
-            weeks = set(lesson['weekNumber']) - {0, }
+            weeks = map(str, set(lesson['weekNumber']) - {0, })
             lesson_info = {'start_time': start_time,
                            'end_time': end_time,
-                           'teacher': str(teacher['id']) if teacher else None,
+                           'teacher': str(teacher[0]['id']) if teacher else None,
                            'type': lesson_type,
                            'name': subject,
                            'location': location,
