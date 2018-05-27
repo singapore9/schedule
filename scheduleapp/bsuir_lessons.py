@@ -105,7 +105,8 @@ def get_schedule_for(local_group_id):
     times = set()
     names = set()
     teachers = set()
-
+    if not data['schedules']:
+        return
     for day_schedule in data['schedules']:
         lessons = day_schedule['schedule']
         day = select_day(day_schedule['weekDay'])
