@@ -108,7 +108,7 @@ def get_schedule_for(local_group_id):
 
     for day_schedule in data['schedules']:
         lessons = day_schedule['schedule']
-        day = day_schedule['weekDay']
+        day = select_day(day_schedule['weekDay'])
         for lesson in lessons:
             lesson_time = lesson['lessonTime']
             start_time, end_time = map(lambda t: datetime.strptime(t, '%H:%M').time(), lesson_time.split('-'))
