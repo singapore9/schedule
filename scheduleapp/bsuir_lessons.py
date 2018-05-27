@@ -62,7 +62,7 @@ def get_all_teachers():
     teacher_objects = resp.json()
     for item in teacher_objects:
         fullname = '%s %s %s' % (item['lastName'], item['firstName'], item['middleName'])
-        bsuir_key = item.find('id').text
+        bsuir_key = str(item['id'])
         Teacher.objects.get_or_create(university=university,
                                       full_name=fullname,
                                       local_id=bsuir_key)
@@ -75,10 +75,11 @@ def get_all_groups():
     data = resp.json()
     for group in data:
         group_info = {
-            'local_id': group['id'],
+            'local_id': str(group['id']),
             'name': group['name'],
-            'faculty_local_id': group['facultyId']
+            'faculty_local_id': str(group['facultyId'])
         }
+        groups.append(group_info)
     university, _ = University.objects.get_or_create(name='БГУИР')
     glob_id_from_local = dict()
     for local_id in set(map(lambda g: g['faculty_local_id'], groups)):
@@ -120,12 +121,12 @@ def get_schedule_for(local_group_id):
             names.add(subject)
             teacher = lesson['employee']
             if teacher:
-                teachers.add(teacher[0]['id'])
+                teachers.add(str(teacher[0]['id']))
             location = lesson['auditory'][0] if lesson['auditory'] else None
             weeks = set(lesson['weekNumber']) - {0, }
             lesson_info = {'start_time': start_time,
                            'end_time': end_time,
-                           'teacher': teacher.find('id').text if teacher else None,
+                           'teacher': str(teacher['id']) if teacher else None,
                            'type': lesson_type,
                            'name': subject,
                            'location': location,
